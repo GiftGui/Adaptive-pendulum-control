@@ -1,0 +1,3 @@
+../Core/Src/fake_sensor.c:47:6:Configure_FakeSensor	1
+../Core/Src/fake_sensor.c:52:6:Get_FakeSensorValue	1
+../Core/Src/fake_sensor.c:57:6:Set_FakeSensorValue	1
