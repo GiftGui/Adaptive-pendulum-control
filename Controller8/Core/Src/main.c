@@ -132,7 +132,7 @@ int main(void)
      * system_stm32f0xx.c file
      */
 
-	SysTick_Config(80000); // 8MHz / 8000 = 1000 Hz = 1ms, SysTick interrupt every 1ms(System runs on 8MHz)
+	SysTick_Config(40000); // 8MHz / 8000 = 1000 Hz = 1ms, SysTick interrupt every 1ms(System runs on 8MHz)
 
 	Configure_GlobalClock();
 

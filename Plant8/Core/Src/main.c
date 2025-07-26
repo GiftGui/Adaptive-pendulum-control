@@ -136,8 +136,7 @@ int main(void)
      * To reconfigure the default setting of SystemInit() function, refer to
      * system_stm32f0xx.c file
      */
-
-	SysTick_Config(80000); // SysTick interrupt every 1ms (System runs on 8MHz)
+	SysTick_Config(40000);
 
 	Configure_GlobalClock();
 

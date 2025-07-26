@@ -5609,12 +5609,12 @@ int main(void)
  80028b4:	b5b0      	push	{r4, r5, r7, lr}
  80028b6:	b09a      	sub	sp, #104	@ 0x68
  80028b8:	af00      	add	r7, sp, #0
+     * this is done through SystemInit() function which is called from startup
      * file (startup_stm32f072xb.s) before to branch to application main.
      * To reconfigure the default setting of SystemInit() function, refer to
      * system_stm32f0xx.c file
      */
-
-	SysTick_Config(80000); // SysTick interrupt every 1ms (System runs on 8MHz)
+	SysTick_Config(40000);
  80028ba:	4b6e      	ldr	r3, [pc, #440]	@ (8002a74 <main+0x1c0>)
  80028bc:	0018      	movs	r0, r3
  80028be:	f7ff fead 	bl	800261c <SysTick_Config>
@@ -5881,7 +5881,7 @@ int main(void)
  8002a6e:	f000 fa13 	bl	8002e98 <TransmitString_TII>
     	if(mode == MASTER)
  8002a72:	e73e      	b.n	80028f2 <main+0x3e>
- 8002a74:	00013880 	.word	0x00013880
+ 8002a74:	00009c40 	.word	0x00009c40
  8002a78:	08004098 	.word	0x08004098
  8002a7c:	2000025c 	.word	0x2000025c
  8002a80:	20000030 	.word	0x20000030

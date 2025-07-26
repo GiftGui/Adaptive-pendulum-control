@@ -6736,7 +6736,7 @@ int main(void)
      * system_stm32f0xx.c file
      */
 
-	SysTick_Config(80000); // 8MHz / 8000 = 1000 Hz = 1ms, SysTick interrupt every 1ms(System runs on 8MHz)
+	SysTick_Config(40000); // 8MHz / 8000 = 1000 Hz = 1ms, SysTick interrupt every 1ms(System runs on 8MHz)
  80031b2:	4b67      	ldr	r3, [pc, #412]	@ (8003350 <main+0x1a4>)
  80031b4:	0018      	movs	r0, r3
  80031b6:	f7ff feb7 	bl	8002f28 <SysTick_Config>
@@ -6984,7 +6984,7 @@ int main(void)
     	if(mode == MASTER)
  800334c:	e749      	b.n	80031e2 <main+0x36>
  800334e:	46c0      	nop			@ (mov r8, r8)
- 8003350:	00013880 	.word	0x00013880
+ 8003350:	00009c40 	.word	0x00009c40
  8003354:	08004994 	.word	0x08004994
  8003358:	20000000 	.word	0x20000000
  800335c:	080049c4 	.word	0x080049c4
