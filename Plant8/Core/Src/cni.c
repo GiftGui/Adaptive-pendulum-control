@@ -97,23 +97,12 @@ void IncomingMessageHandler_CNI(void)
 	// Receive an observation message
 	if(ReceiveMessage_CNI(&obs))
 	{
-		if(strcmp(obs.name, "reference clock") == 0)
-		{
-			// State estimation
-			//
-			// WCCOM = 0s (calculated by sender)
-			// WCETrec = discarded
-
-			// Write the RT image of the global clock
-			Set_GlobalClock(obs.val); // Time of use
-		}
-
 		// -------------------------------------------------------------- START
 		// REMOVE THIS CODE
 		// --------------------------------------------------------------
-		if(strcmp(obs.name, "torque") == 0)
+		if(obs.id == 0)
 		{
-			rtU.controlTorque = (real_T)obs.val;
+			rtU.controlTorque = (real_T)obs.val1;
 		}
 		// --------------------------------------------------------------- STOP
 	}

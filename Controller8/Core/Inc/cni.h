@@ -39,9 +39,10 @@
  */
 typedef struct
 {
-	char name[16];
-	uint32_t time;
-	double val;
+	uint8_t id;
+	float val1;
+	float val2;
+	float val3;
 }observation_t;
 
 // Define scaling factor

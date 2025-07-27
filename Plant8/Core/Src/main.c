@@ -136,7 +136,7 @@ int main(void)
      * To reconfigure the default setting of SystemInit() function, refer to
      * system_stm32f0xx.c file
      */
-	SysTick_Config(40000);
+	SysTick_Config(80000);
 
 	Configure_GlobalClock();
 
@@ -192,18 +192,11 @@ int main(void)
         		TransmitString_TII("\r\n");
 
         		observation_t obs =
-        			{"acceleration", Get_GlobalClock(), (double)rtY.thetaDoubleDot};
+        			{1, (float)rtY.thetaDoubleDot, (float)rtY.thetaDot, (float)rtY.theta};
 
         		// Transmit the observation message
         		TransmitMessage_CNI(&obs);
 
-    			observation_t obs1 =
-    				{"velocity", Get_GlobalClock(), (double)rtY.thetaDot};
-    			TransmitMessage_CNI(&obs1);
-
-    			observation_t obs2 =
-    								{"angle", Get_GlobalClock(), (double)rtY.theta};
-    							TransmitMessage_CNI(&obs2);
 
         	}
     	    if((local_tick % 500) == 0){

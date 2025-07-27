@@ -97,30 +97,12 @@ void IncomingMessageHandler_CNI(void)
 	// Receive an observation message
 	if(ReceiveMessage_CNI(&obs))
 	{
-		if(strcmp(obs.name, "reference clock") == 0)
+		if(obs.id == 1)
 		{
-			// State estimation
-			//
-			// WCCOM = 0s (calculated by sender)
-			// WCETrec = discarded
-
-			// Write the RT image of the global clock
-			Set_GlobalClock(obs.val); // Time of use
+			rtU.thetaDoubleDot = (real_T)obs.val1;
+			rtU.thetaDot = (real_T)obs.val2;
+			rtU.theta = (real_T)obs.val3;
 		}
-
-		if(strcmp(obs.name, "acceleration") == 0)
-		{
-			rtU.thetaDoubleDot = (real_T)obs.val;
-		}
-		if(strcmp(obs.name, "velocity") == 0)
-		{
-			rtU.thetaDot = (real_T)obs.val;
-		}
-		if(strcmp(obs.name, "angle") == 0)
-		{
-			rtU.theta = (real_T)obs.val;
-		}
-
 	}
 }
 

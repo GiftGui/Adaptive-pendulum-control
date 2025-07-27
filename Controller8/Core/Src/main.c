@@ -132,7 +132,7 @@ int main(void)
      * system_stm32f0xx.c file
      */
 
-	SysTick_Config(40000); // 8MHz / 8000 = 1000 Hz = 1ms, SysTick interrupt every 1ms(System runs on 8MHz)
+	SysTick_Config(80000); // 8MHz / 8000 = 1000 Hz = 1ms, SysTick interrupt every 1ms(System runs on 8MHz)
 
 	Configure_GlobalClock();
 
@@ -153,8 +153,8 @@ int main(void)
     	{
     		IncomingMessageHandler_CNI();
     		AdaptiveController_step();
-    		observation_t obs =
-    			{"reference clock", Get_GlobalClock(), Get_GlobalClock()};
+/*    		observation_t obs =
+    			{0, (float)Get_GlobalClock()};
 
     		// State estimation
     		// WCETsend = discarded
@@ -168,11 +168,11 @@ int main(void)
     		//       = 1/9600 * (10) * (24)
     		//       = 25ms
     		// ----------------------------------------------------------- STOP
-    		obs.time += 1;
     		obs.val += 1;
 
     		// Transmit the observation message
     		TransmitMessage_CNI(&obs);
+*/
 
 			statesToInt(rtU.referenceThetaDoubleDot);        // Show set point
 			TransmitString_TII(" ");
@@ -188,15 +188,15 @@ int main(void)
 
     		TransmitString_TII("\r\n");
 
-			observation_t obss =
-				{"torque", Get_GlobalClock(), (double)rtY.control};
+			observation_t obs =
+				{0, (float)rtY.control, 0, 0};
 
 			// State estimation is not possible, because there is no
 			// mathematical relation between the global time and the fake
 			// sensor's value
 
 			// Transmit the observation message
-			TransmitMessage_CNI(&obss);
+			TransmitMessage_CNI(&obs);
     	    if((local_tick % 1000) == 0) {
     	        // Global time sync
 
