@@ -65,19 +65,7 @@ void Inc_LocalClock(void);
 uint32_t Get_LocalClock(void);
 
 // Private functions -----------------------------------------------------------
-void statesToInt(double x)
-{
-	char *tmpSign = (x < 0) ? "-" : "";
-	double tmpVal = (x < 0) ? -x : x;
 
-	int tmpInt1 = tmpVal;                  // Get the integer (678).
-	double tmpFrac = tmpVal - tmpInt1;      // Get fraction (0.0123).
-	int tmpInt2 = trunc(tmpFrac * 10000);  // Turn into integer (123).
-	TransmitString_TII(tmpSign);
-	printStates(tmpInt1);
-	TransmitString_TII(".");
-	printStates(tmpInt2);
-}
 void printStates(int number)
 {
 	int16_t base_val = 10, digit, i = 0, n = 0;
@@ -110,6 +98,65 @@ void printStates(int number)
 		}
 }
 
+void statesToInt(double x, int decimal_places)
+{
+    char *tmpSign = (x < 0) ? "-" : "";
+    double tmpVal = (x < 0) ? -x : x;
+
+    // Calculate multiplier based on desired decimal places
+    int multiplier = 1;
+    for(int i = 0; i < decimal_places; i++) {
+        multiplier *= 10;
+    }
+
+    // Round to avoid floating-point precision issues
+    tmpVal = tmpVal + 0.5 / multiplier;
+
+    int tmpInt1 = (int)tmpVal;                              // Integer part
+    double tmpFrac = tmpVal - tmpInt1;                      // Fractional part
+    int tmpInt2 = (int)(tmpFrac * multiplier);              // Fractional digits as integer
+
+    TransmitString_TII(tmpSign);
+    printStates(tmpInt1);
+    TransmitString_TII(".");
+
+    // Print fractional part with leading zeros
+    printStatesWithLeadingZeros(tmpInt2, decimal_places);
+}
+
+// Modified printStates to handle leading zeros for decimal part
+void printStatesWithLeadingZeros(int number, int min_digits)
+{
+    char x_str[32];
+    int n = 0, i;
+
+    // Handle zero case
+    if (number == 0) {
+        for(i = 0; i < min_digits; i++) {
+            TransmitString_TII("0");
+        }
+        return;
+    }
+
+    // Convert number to string
+    int temp = number;
+    while (temp > 0) {
+        x_str[n++] = (temp % 10) + '0';
+        temp /= 10;
+    }
+
+    // Add leading zeros if needed
+    while (n < min_digits) {
+        x_str[n++] = '0';
+    }
+
+    // Reverse and transmit
+    for (i = n - 1; i >= 0; i--) {
+        char single_char[2] = {x_str[i], '\0'};
+        TransmitString_TII(single_char);
+    }
+}
+
 void Inc_LocalClock(void)
 {
 	local_tick++;
@@ -132,7 +179,7 @@ int main(void)
      * system_stm32f0xx.c file
      */
 
-	SysTick_Config(80000); // 8MHz / 8000 = 1000 Hz = 1ms, SysTick interrupt every 1ms(System runs on 8MHz)
+	SysTick_Config(80000); // 8MHz / 8000 = x Hz (System runs on 8MHz)
 
 	Configure_GlobalClock();
 
@@ -153,74 +200,45 @@ int main(void)
     	{
     		IncomingMessageHandler_CNI();
     		AdaptiveController_step();
-/*    		observation_t obs =
-    			{0, (float)Get_GlobalClock()};
 
-    		// State estimation
-    		// WCETsend = discarded
-			// WCCOM = 1/baudrate * nof bits in frame * sizeof(observation_t)
-			//       = 25ms
-    		// ---------------------------------------------------------- START
-    		// REMOVE THIS CODE
-    		// ----------------------------------------------------------
-    		// WCCOM = 1/9600 * nof bits in frame * sizeof(observation_t)
-    		//       = 1/9600 * (1 + 8 + 1) * (16 + 4 + 4)
-    		//       = 1/9600 * (10) * (24)
-    		//       = 25ms
-    		// ----------------------------------------------------------- STOP
-    		obs.val += 1;
-
-    		// Transmit the observation message
-    		TransmitMessage_CNI(&obs);
-*/
-
-			statesToInt(rtU.referenceThetaDoubleDot);        // Show set point
+			statesToInt(rtU.referenceThetaDoubleDot, 3);        // Show set point
 			TransmitString_TII(" ");
-			statesToInt(rtY.control);     		 // torque
+			statesToInt(rtY.control, 3);     		 // torque
 			TransmitString_TII(" ");
-    		statesToInt(rtU.thetaDoubleDot);     // Angular acceleration
+    		statesToInt(rtU.thetaDoubleDot, 3);     // Angular acceleration
     		TransmitString_TII(" ");
-    		statesToInt(rtU.thetaDot);           // Angular velocity
+    		statesToInt(rtU.thetaDot, 3);           // Angular velocity
     		TransmitString_TII(" ");
-    		statesToInt(rtU.theta);              // Angular position
+    		statesToInt(rtU.theta, 3);              // Angular position
     		TransmitString_TII(" ");
-    		statesToInt((double)Get_GlobalClock());        // Show global clock
+    		statesToInt((double)Get_GlobalClock(), 3);        // Show global clock
 
     		TransmitString_TII("\r\n");
 
 			observation_t obs =
-				{0, (float)rtY.control, 0, 0};
-
-			// State estimation is not possible, because there is no
-			// mathematical relation between the global time and the fake
-			// sensor's value
+				{0, (double)rtY.control, (double)(Get_GlobalClock()+9), 0}; // Change global tick transmission logic here
 
 			// Transmit the observation message
 			TransmitMessage_CNI(&obs);
     	    if((local_tick % 1000) == 0) {
     	        // Global time sync
-
+    	    	// Because communication delay and too much information influence the control effect
+    	    	// I comment out this global time synchronization part to reduce the communication load and make information transmission more effective
         		// Send global clock observation message
-        		// Read the RT image of the global clock
+    	    	/*    		observation_t obs =
+    	    	    			{0, (float)Get_GlobalClock()};
 
-    	    }
-    	    if((local_tick % 500) == 0){
-        		// ---------------------------------------------------------- START
+							// because global tick increase every 50ms
+    	    	    		obs.val += 1;
 
-        		// ----------------------------------------------------------- STOP
+    	    	    		// Transmit the observation message
+    	    	    		TransmitMessage_CNI(&obs);
+    	    	*/
     	    }
     	}
     	else // Node
     	{
-			// Check if there are any messages
-
-
-    		// Read the RT image of the fake sensor
-    		if(Get_FakeSensorValue() == 1)
-    		{
-    			// Transmit message
-    			TransmitString_TII("B1 clicked on master\r\n");
-    		}
+			;
     	}
     }
 }
@@ -242,7 +260,6 @@ inline void delay_ms(const uint32_t t)
 		; // Do nothing
 	}
 }
-
 /**
   * Brief  This function:
   *        - enables the peripheral clocks on GPIO port A,
@@ -389,5 +406,4 @@ void EXTI4_15_IRQHandler(void)
     {
         ;
     }
-
 }

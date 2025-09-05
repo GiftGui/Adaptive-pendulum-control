@@ -62,25 +62,12 @@ void ConfigureGPIO(void);
 void ConfigureExternalIT(void);
 void delay_ms(const uint32_t t);
 
-void statesToInt(double);
+void statesToInt(double, int);
 void printStates(int);
 void Inc_LocalClock(void);
 uint32_t Get_LocalClock(void);
 
 // Private functions -----------------------------------------------------------
-void statesToInt(double x)
-{
-	char *tmpSign = (x < 0) ? "-" : "";
-	double tmpVal = (x < 0) ? -x : x;
-
-	int tmpInt1 = tmpVal;                  // Get the integer (678).
-	double tmpFrac = tmpVal - tmpInt1;      // Get fraction (0.0123).
-	int tmpInt2 = trunc(tmpFrac * 10000);  // Turn into integer (123).
-	TransmitString_TII(tmpSign);
-	printStates(tmpInt1);
-	TransmitString_TII(".");
-	printStates(tmpInt2);
-}
 void printStates(int number)
 {
 	int16_t base_val = 10, digit, i = 0, n = 0;
@@ -115,6 +102,66 @@ void printStates(int number)
 		}
 
 }
+
+void statesToInt(double x, int decimal_places)
+{
+    char *tmpSign = (x < 0) ? "-" : "";
+    double tmpVal = (x < 0) ? -x : x;
+
+    // Calculate multiplier based on desired decimal places
+    int multiplier = 1;
+    for(int i = 0; i < decimal_places; i++) {
+        multiplier *= 10;
+    }
+
+    // Round to avoid floating-point precision issues
+    tmpVal = tmpVal + 0.5 / multiplier;
+
+    int tmpInt1 = (int)tmpVal;                              // Integer part
+    double tmpFrac = tmpVal - tmpInt1;                      // Fractional part
+    int tmpInt2 = (int)(tmpFrac * multiplier);              // Fractional digits as integer
+
+    TransmitString_TII(tmpSign);
+    printStates(tmpInt1);
+    TransmitString_TII(".");
+
+    // Print fractional part with leading zeros
+    printStatesWithLeadingZeros(tmpInt2, decimal_places);
+}
+
+// Modified printStates to handle leading zeros for decimal part
+void printStatesWithLeadingZeros(int number, int min_digits)
+{
+    char x_str[32];
+    int n = 0, i;
+
+    // Handle zero case
+    if (number == 0) {
+        for(i = 0; i < min_digits; i++) {
+            TransmitString_TII("0");
+        }
+        return;
+    }
+
+    // Convert number to string
+    int temp = number;
+    while (temp > 0) {
+        x_str[n++] = (temp % 10) + '0';
+        temp /= 10;
+    }
+
+    // Add leading zeros if needed
+    while (n < min_digits) {
+        x_str[n++] = '0';
+    }
+
+    // Reverse and transmit
+    for (i = n - 1; i >= 0; i--) {
+        char single_char[2] = {x_str[i], '\0'};
+        TransmitString_TII(single_char);
+    }
+}
+
 void Inc_LocalClock(void)
 {
 	local_tick++;
@@ -158,18 +205,10 @@ int main(void)
     {
     	if(mode == MASTER)
     	{
-        	// Wait for 1000ms
-    		delay_ms(1000);
-
-    		// Send global clock observation message
-    		// Read the RT image of the global clock
-
-
-
+        	;
     	}
     	else // Node
     	{
-
     		lasttick = tick;
         	tick= Get_LocalClock();
         	if (tick>lasttick)
@@ -179,40 +218,24 @@ int main(void)
         		Undamped_step();
 
         		// Output data in the format: torque, acceleration, velocity, displacement
-        		statesToInt(rtU.controlTorque);
+        		statesToInt(rtU.controlTorque, 3);
         		TransmitString_TII((char*)" ");  // Input torque
-        		statesToInt(rtY.thetaDoubleDot);     // Angular acceleration
+        		statesToInt(rtY.thetaDoubleDot, 3);     // Angular acceleration
         		TransmitString_TII(" ");
-        		statesToInt(rtY.thetaDot);           // Angular velocity
+        		statesToInt(rtY.thetaDot, 3);           // Angular velocity
         		TransmitString_TII(" ");
-        		statesToInt(rtY.theta);              // Angular position
+        		statesToInt(rtY.theta, 3);              // Angular position
         		TransmitString_TII(" ");
-        		statesToInt((double)Get_GlobalClock());        // Show global clock
+        		statesToInt((double)Get_GlobalClock(), 3);        // Show global clock
 
         		TransmitString_TII("\r\n");
 
         		observation_t obs =
-        			{1, (float)rtY.thetaDoubleDot, (float)rtY.thetaDot, (float)rtY.theta};
+        			{1, (double)rtY.thetaDoubleDot, (double)rtY.thetaDot, (double)rtY.theta};
 
         		// Transmit the observation message
         		TransmitMessage_CNI(&obs);
-
-
         	}
-    	    if((local_tick % 500) == 0){
-
-    	    }
-
-    		// Read the RT image of the fake sensor
-    		if(Get_FakeSensorValue() == 1)
-    		{
-    			// Transmit message
-    			TransmitString_TII("B1 clicked on master\r\n");
-    		}
-    		else{
-    			;
-    		}
-
     	}
     }
 }
@@ -357,25 +380,23 @@ void SysTick_Handler(void)
   */
 void EXTI4_15_IRQHandler(void)
 {
+	// Code for question1 is here, but not be used in subsequent questions
     // Check line 13 has triggered the IT
     if ((EXTI->PR & EXTI_PR_PR13) != 0)
     {
-    	if(mode == MASTER)
+    	if (forceOn == 0)
     	{
-			// Update the RT image of the fake sensor
-			if(Get_FakeSensorValue() == 0)
-			{
-				Set_FakeSensorValue(1);
-			}
-			else
-			{
-				Set_FakeSensorValue(0);
-			}
+    		forceOn = 1;
+    		rtU.controlTorque = 100.0;  // Fixed: use controlTorque instead of force
     	}
-    	else
+    	else if (forceOn == 1)
     	{
-    		mode = MASTER;
+    		forceOn = 0;
+    		rtU.controlTorque = 0.0;    // Fixed: use controlTorque instead of force
     	}
+
+        // Toggle the green LED
+        GPIOA->ODR ^= GPIO_ODR_5;
 
         // Clear the pending bit
         EXTI->PR = EXTI_PR_PR13;

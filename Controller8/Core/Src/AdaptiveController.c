@@ -80,7 +80,7 @@ void AdaptiveController_step(void)
    *  Sum: '<Root>/Add'
    *  Sum: '<Root>/Add3'
    */
-  rtY.control = ((rtU.referenceThetaDoubleDot - 8.0 * rtb_Add2) - 16.0 *
+  rtY.control = ((rtU.referenceThetaDoubleDot - 20.0 * rtb_Add2) - 100.0 *
                  rtb_Add1) * rtDW.DiscreteTimeIntegrator_DSTATE +
     rtDW.DiscreteTimeIntegrator1_DSTATE * rtb_SineWaveFunction;
 
@@ -100,37 +100,37 @@ void AdaptiveController_step(void)
   for (i = 0; i < 2; i++) {
     rtb_SineWaveFunction = y[i + 2];
     a_idx_0 = y[i];
-    p_dot[i] = (rtb_SineWaveFunction * 0.0664 + a_idx_0 * 0.0312) * rtb_Add2 +
-      (rtb_SineWaveFunction * 0.0312 + a_idx_0 * 1.3125) * rtb_Add1;
+    p_dot[i] = (rtb_SineWaveFunction * 0.0253 + a_idx_0 * 0.005) * rtb_Add2 +
+      (rtb_SineWaveFunction * 0.005 + a_idx_0 * 2.625) * rtb_Add1;
   }
 
   /* Update for DiscreteIntegrator: '<Root>/Discrete-Time Integrator2' incorporates:
    *  Inport: '<Root>/referenceThetaDoubleDot'
    */
-  rtDW.DiscreteTimeIntegrator2_DSTATE += 0.001 * rtU.referenceThetaDoubleDot;
+  rtDW.DiscreteTimeIntegrator2_DSTATE += 0.01 * rtU.referenceThetaDoubleDot;
 
   /* Update for DiscreteIntegrator: '<Root>/Discrete-Time Integrator3' */
-  rtDW.DiscreteTimeIntegrator3_DSTATE += 0.001 * rtb_DiscreteTimeIntegrator2;
+  rtDW.DiscreteTimeIntegrator3_DSTATE += 0.01 * rtb_DiscreteTimeIntegrator2;
 
   /* Update for DiscreteIntegrator: '<Root>/Discrete-Time Integrator' incorporates:
    *  MATLAB Function: '<Root>/MATLAB Function'
    */
-  rtDW.DiscreteTimeIntegrator_DSTATE += 0.001 * p_dot[0];
+  rtDW.DiscreteTimeIntegrator_DSTATE += 0.01 * p_dot[0];
 
   /* Update for DiscreteIntegrator: '<Root>/Discrete-Time Integrator1' incorporates:
    *  MATLAB Function: '<Root>/MATLAB Function'
    */
-  rtDW.DiscreteTimeIntegrator1_DSTATE += 0.001 * p_dot[1];
+  rtDW.DiscreteTimeIntegrator1_DSTATE += 0.01 * p_dot[1];
 }
 
 /* Model initialize function */
 void AdaptiveController_initialize(void)
 {
   /* InitializeConditions for DiscreteIntegrator: '<Root>/Discrete-Time Integrator' */
-  rtDW.DiscreteTimeIntegrator_DSTATE = 8.0;
+  rtDW.DiscreteTimeIntegrator_DSTATE = 9.0;
 
   /* InitializeConditions for DiscreteIntegrator: '<Root>/Discrete-Time Integrator1' */
-  rtDW.DiscreteTimeIntegrator1_DSTATE = 5.0;
+  rtDW.DiscreteTimeIntegrator1_DSTATE = 9.0;
 }
 
 /*

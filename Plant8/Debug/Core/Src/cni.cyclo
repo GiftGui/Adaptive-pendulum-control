@@ -4,10 +4,10 @@
 ../Core/Src/cni.c:76:13:Configure_CNI	1
 ../Core/Src/cni.c:82:6:TransmitMessage_CNI	2
 ../Core/Src/cni.c:93:6:IncomingMessageHandler_CNI	3
-../Core/Src/cni.c:111:9:ReceiveMessage_CNI	6
-../Core/Src/cni.c:157:13:ConfigureGPIO_UART1	1
-../Core/Src/cni.c:178:13:Configure_UART1	2
-../Core/Src/cni.c:204:6:ReceiveByte_CNI	2
-../Core/Src/cni.c:221:6:TransmitByte_CNI	3
-../Core/Src/cni.c:260:15:nUnreadBytes_CNI	3
-../Core/Src/cni.c:282:6:USART1_IRQHandler	5
+../Core/Src/cni.c:123:9:ReceiveMessage_CNI	6
+../Core/Src/cni.c:169:13:ConfigureGPIO_UART1	1
+../Core/Src/cni.c:190:13:Configure_UART1	2
+../Core/Src/cni.c:216:6:ReceiveByte_CNI	2
+../Core/Src/cni.c:233:6:TransmitByte_CNI	3
+../Core/Src/cni.c:272:15:nUnreadBytes_CNI	3
+../Core/Src/cni.c:294:6:USART1_IRQHandler	5

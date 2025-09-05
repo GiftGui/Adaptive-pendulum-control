@@ -40,9 +40,9 @@
 typedef struct
 {
 	uint8_t id;
-	float val1;
-	float val2;
-	float val3;
+	double val1;
+	double val2;
+	double val3;
 }observation_t;
 
 // Define scaling factor

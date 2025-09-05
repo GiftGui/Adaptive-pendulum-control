@@ -97,14 +97,26 @@ void IncomingMessageHandler_CNI(void)
 	// Receive an observation message
 	if(ReceiveMessage_CNI(&obs))
 	{
-		// -------------------------------------------------------------- START
-		// REMOVE THIS CODE
-		// --------------------------------------------------------------
 		if(obs.id == 0)
 		{
 			rtU.controlTorque = (real_T)obs.val1;
+			Set_GlobalClock((uint32_t)obs.val2);  //Change global synchronization receive logic
 		}
-		// --------------------------------------------------------------- STOP
+
+/*		Because communication delay and too much information influence the control effect
+    	I comment out this global time synchronization part of Q2 to reduce the communication load and make information transmission more effective
+ *
+ 	 	if(strcmp(obs.name, "reference clock") == 0)
+		{
+				// State estimation
+				//
+				// WCCOM = 0s (calculated by sender)
+				// WCETrec = discarded
+
+				// Write the RT image of the global clock
+				Set_GlobalClock(obs.val); // Time of use
+		}
+*/
 	}
 }
 

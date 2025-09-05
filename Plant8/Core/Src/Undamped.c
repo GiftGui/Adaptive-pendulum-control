@@ -69,10 +69,10 @@ void Undamped_step(void)
   rtY.thetaDot = rtDW.DiscreteTimeIntegrator_DSTATE;
 
   /* Update for DiscreteIntegrator: '<S1>/Discrete-Time Integrator' */
-  rtDW.DiscreteTimeIntegrator_DSTATE += 0.001 * rtb_uI;
+  rtDW.DiscreteTimeIntegrator_DSTATE += 0.01 * rtb_uI;
 
   /* Update for DiscreteIntegrator: '<S1>/Discrete-Time Integrator1' */
-  rtDW.DiscreteTimeIntegrator1_DSTATE += 0.001 * rtb_DiscreteTimeIntegrator;
+  rtDW.DiscreteTimeIntegrator1_DSTATE += 0.01 * rtb_DiscreteTimeIntegrator;
 }
 
 /* Model initialize function */
